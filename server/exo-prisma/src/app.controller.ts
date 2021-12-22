@@ -43,8 +43,7 @@ export class AppController {
     @Req() request: Request
   ): Promise<MovieModel> {
     const { idMovie, original_title, overview, poster_path, backdrop_path } = movieData;
-    console.log(request.body)
-    console.log(movieData)
+    
     return this.movieService.createMovie({
       idMovie: parseInt(idMovie),
       original_title: original_title,
@@ -55,8 +54,7 @@ export class AppController {
   }
   @Delete('movie/:id')
   async deleteMovie(@Param('id') idMovie: string, @Req() request: Request): Promise<MovieModel> {
-    console.log(idMovie)
-    console.log(">>>request:",request.body)
+    
     return this.movieService.deleteMovie({idMovie: parseInt(idMovie) });
   }
   /*
