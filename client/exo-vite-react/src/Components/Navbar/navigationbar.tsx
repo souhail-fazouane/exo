@@ -1,7 +1,10 @@
+import { text } from '@fortawesome/fontawesome-svg-core'
 import React, { useEffect, useState } from 'react'
+import { fetchSearchData } from '../../api/tmdb/fetchDataTMDB'
+import { ResultMovie } from '../../App'
 
 
-function NavigationBar(props:any){
+function NavigationBar(props:{setSearchData:React.Dispatch<React.SetStateAction<ResultMovie[]>>}){
   const {setSearchData}=props
   const [textValue, setTextValue] = useState("")
 
@@ -12,22 +15,9 @@ function NavigationBar(props:any){
     if (textValue==""){
       setSearchData([])
     }else{
-      const apiSearchData = `https://api.themoviedb.org/3/search/movie?api_key=aa9f6ed99dc2087a9ba01eeb0cf2b20e&query=${textValue.split(" ").join("+")}`
 
-      fetch(apiSearchData)
-    .then(response => {
-      if (response.ok){
-        return response.json()
-      }
-      throw response
-    })
-    .then(data => {
-      setSearchData(data.results)
-      console.log(data.results)
-    })
-    .catch(error => {
-      console.error("Error Fetching Top Rated Data", error)
-    })
+      fetchSearchData({textValue:textValue,setSearchData:setSearchData})
+      
     }
   },[textValue])
     return(

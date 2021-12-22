@@ -1,30 +1,29 @@
 import React, { useState, useEffect } from 'react'
+import { fetchAddMovieToWatchList, fetchDeleteMovieFromWatchList, fetchGetWatchList } from './api/fetchDataBackend'
+import { fetchNowPlaying, fetchTopRated } from './api/tmdb/fetchDataTMDB'
 import './App.css'
-import MovieCard from './Components/MovieCard/MovieCard'
 import MovieDetails from './Components/MovieDetails/MovieDetails'
 import MovieList from './Components/MovieList/MovieList'
 import NavigationBar from './Components/Navbar/navigationbar'
 
 
 
-interface ResultMovie {
+export interface ResultMovie {
   adult: boolean;
-backdrop_path: string;
-id: number;
-original_language: string;
-original_title: string;
-overview: string;
-popularity: number;
-poster_path: string;
-release_date: string;
-title: string;
-video: boolean;
-vote_average: number;
-vote_count: number;
-idMovie:string;
+  backdrop_path: string;
+  id: number;
+  original_language: string;
+  original_title: string;
+  overview: string;
+  popularity: number;
+  poster_path: string;
+  release_date: string;
+  title: string;
+  video: boolean;
+  vote_average: number;
+  vote_count: number;
+  idMovie:string;
 }
-
-
 
 function App() {
   const [nowData,setNowData] = useState<ResultMovie[]>([])
@@ -35,101 +34,37 @@ function App() {
   const [movie,setMovie] = useState<ResultMovie>()
   const [likedMovies,setLikedMovies] = useState<ResultMovie[]>([])
   const [likedMovie,setLikedMovie] = useState<ResultMovie>()
-  const api_Token = "aa9f6ed99dc2087a9ba01eeb0cf2b20e"
-  const apiNowPlaying = "https://api.themoviedb.org/3/movie/now_playing?api_key=aa9f6ed99dc2087a9ba01eeb0cf2b20e"
-  const apiTopRated = "https://api.themoviedb.org/3/movie/top_rated?api_key=aa9f6ed99dc2087a9ba01eeb0cf2b20e"
+  
 
   useEffect(()=>{
-    fetch('http://localhost:8080/feed', {
-        method: 'GET',
-        mode: "cors",
-     }).then(response => {
-       console.log(response)
-      if (response.ok){
-        return response.json()
-      }
-      throw response
-    })
-    .then(data => {
-      console.log("data feed",data)
-      setLikedMovies(data.map((value:ResultMovie)=>{return {...value,id:value.idMovie.toString()}}))
-    })
-    .then(function(myJson) {
-         console.log(JSON.stringify(myJson));
-       })
-       .catch(e => {
-         console.log(e)
-       })
+    fetchGetWatchList({setLikedMovies:setLikedMovies})
+    
   },[])
 
   useEffect(()=>{
-    console.log(likedMovie)
     
     if (likedMovie && likedMovies.filter(function(value,index,arr){return value.id!=likedMovie.id}).length==likedMovies.length){
       likedMovies.push({...likedMovie,idMovie:likedMovie.id.toString()})
-      fetch('http://localhost:8080/movie', {
-        method: 'POST',
-        mode: "cors",
-        headers: {
-             'Content-Type': 'application/json',
-             
-        },
-        body: JSON.stringify({
-          idMovie:likedMovie.id.toString(),
-            original_title:likedMovie.original_title,
-            overview:likedMovie.overview,
-            poster_path:likedMovie.poster_path,
-            backdrop_path: likedMovie.backdrop_path
-        })
-     })
-     
-       
+      fetchAddMovieToWatchList({likedMovie:likedMovie})
+          
     }else if(likedMovie){
       setLikedMovies(likedMovies.filter(function(value,index,arr){
         return value.id!=likedMovie.id
       }))
-      fetch(`http://localhost:8080/movie/${likedMovie.idMovie}`, {
-        method: 'DELETE',
-        mode:"cors",
-     })
-     
+      fetchDeleteMovieFromWatchList({likedMovie:likedMovie})
        
     }
   },[likedMovie])
   
   
   useEffect(()=>{
-    fetch(apiNowPlaying)
-    .then(response => {
-      if (response.ok){
-        return response.json()
-      }
-      throw response
-    })
-    .then(data => {
-      setNowData(data.results)
-      console.log(data.results)
-    })
-    .catch(error => {
-      console.error("Error Fetching Now Playing Data", error)
-    })
+    fetchNowPlaying({setNowData:setNowData})
+    
   },[])
   
   useEffect(()=>{
-    fetch(apiTopRated)
-    .then(response => {
-      if (response.ok){
-        return response.json()
-      }
-      throw response
-    })
-    .then(data => {
-      setTopData(data.results)
-      console.log(data.results)
-    })
-    .catch(error => {
-      console.error("Error Fetching Top Rated Data", error)
-    })
+    fetchTopRated({setTopData:setTopData})
+    
     
   },[])
 
@@ -147,10 +82,10 @@ function App() {
       <div style={{filter:filter,}}>
       <NavigationBar setSearchData={setSearchData}  />
       <div style={{overflowY:"scroll",height:"92vh"}}>
-      <MovieList label="Searching Movies" data={searchData} setMovie={setMovie} setClickDetails={setClickDetails} />
-      <MovieList label="Now Playing in The Theater" data={nowData} setMovie={setMovie} setClickDetails={setClickDetails} />
-      <MovieList label="Top Rated Movies" data={topData} setMovie={setMovie} setClickDetails={setClickDetails} />
-      <MovieList label="My WatchList" data={likedMovies} setMovie={setMovie} setClickDetails={setClickDetails} />
+      <MovieList label="Searching Movies" data={searchData} setMovie={setMovie} setClickDetails={setClickDetails} clickDetails={clickDetails} />
+      <MovieList label="Now Playing in The Theater" data={nowData} setMovie={setMovie} setClickDetails={setClickDetails} clickDetails={clickDetails} />
+      <MovieList label="Top Rated Movies" data={topData} setMovie={setMovie} setClickDetails={setClickDetails} clickDetails={clickDetails} />
+      <MovieList label="My WatchList" data={likedMovies} setMovie={setMovie} setClickDetails={setClickDetails} clickDetails={clickDetails} />
 
       </div>
       </div>
