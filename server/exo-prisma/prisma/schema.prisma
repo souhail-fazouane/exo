@@ -14,11 +14,15 @@ model User {
   id    Int     @default(autoincrement()) @id
   email String  @unique
   name  String?
-  movies Movie[]
+  movies Movie[] 
 }
 
 model Movie {
   id        Int      @default(autoincrement()) @id
-  idMovie     Int   
+  idMovie     Int   @unique
+  original_title  String
+  overview      String?
+  poster_path   String?
+  backdrop_path   String?
   whoLiked    User[]
 }
